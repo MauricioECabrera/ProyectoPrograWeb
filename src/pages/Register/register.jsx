@@ -57,23 +57,45 @@ export default function Register() {
     setPopup({ ...popup, show: false });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const validation = validateForm(formData);
+  const validation = validateForm(formData);
 
-    if (!validation.isValid) {
-      showPopup("error", "Error de validación", validation.error);
+  if (!validation.isValid) {
+    showPopup("error", "Error de validación", validation.error);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showPopup("error", "Error al registrarse", data.message || "No se pudo crear la cuenta");
       return;
     }
 
-    // Si llegamos aquí, el registro fue exitoso (simulación)
     showPopup("success", "¡Registro exitoso!", "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.");
 
     setTimeout(() => {
-      navigate("/login"); // Redirigir usando React Router
+      navigate("/login");
     }, 2000);
-  };
+  } catch (err) {
+    console.error(err);
+    showPopup("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta nuevamente.");
+  }
+};
+
 
   return (
     <>
