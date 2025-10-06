@@ -116,24 +116,20 @@ export default function Login() {
         </form>
 
         <div className="extra-links">
-          <a
-            href="#"
-            className="forgot-password"
-            onClick={(e) => {
-              e.preventDefault();
-              showPopup(
-                "info",
-                "Recuperar contraseña",
-                "Esta funcionalidad estará disponible próximamente. Por ahora, contacta al administrador del sistema."
-              );
-            }}
-          >
+          <Link to="/recuperar-contrasena" className="forgot-password">
             ¿Olvidaste tu contraseña?
-          </a>
+          </Link>
           <br />
           <br />
           <Link to="/register" className="create-account">
             Crear una cuenta nueva
+          </Link>
+        </div>
+
+        {/* Botón de regreso al inicio */}
+        <div className="back-to-home">
+          <Link to="/index" className="btn-secondary">
+            ← Volver al inicio
           </Link>
         </div>
       </div>

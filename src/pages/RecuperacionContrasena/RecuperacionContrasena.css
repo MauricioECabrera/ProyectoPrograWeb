@@ -1,10 +1,4 @@
-/* Reset y variables CSS */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* Variables CSS reutilizadas del proyecto */
 :root {
   /* Paleta de colores principal */
   --primary-dark: #1a1a2e;
@@ -50,7 +44,14 @@
   --border-radius-lg: 16px;
 }
 
-/* Estilos base del body */
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Fondo base igual al login */
 body {
   font-family: var(--font-primary);
   line-height: 1.6;
@@ -61,7 +62,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Fondo animado con efectos visuales */
+/* Fondo animado */
 body::before {
   content: '';
   position: fixed;
@@ -83,8 +84,8 @@ body::before {
 }
 
 /* Contenedor principal */
-.login-container {
-  max-width: 400px;
+.recovery-container {
+  max-width: 450px;
   margin: 0 auto;
   padding: var(--spacing-xl);
   min-height: 100vh;
@@ -95,54 +96,120 @@ body::before {
   z-index: 1;
 }
 
-/* Logo */
-.logo {
+/* Logo reutilizando estilos existentes */
+.recovery-container .logo {
   text-align: center;
   margin-bottom: var(--spacing-xl);
   animation: fadeInDown 0.8s ease-out;
 }
 
-.logo img {
-  max-width: 80px;
-  height: auto;
-  filter: drop-shadow(0 4px 12px var(--shadow-medium));
-  transition: transform 0.3s ease;
-}
-
-.logo img:hover {
-  transform: scale(1.05);
-}
-
-/* Títulos */
-h1 {
-  font-family: var(--font-heading);
-  font-size: 2rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: var(--spacing-sm);
-  background: linear-gradient(135deg, var(--white) 0%, rgba(255, 255, 255, 0.8) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Indicador de pasos */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-xxl);
+  padding: 0 var(--spacing-md);
   animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
-/* Párrafo descriptivo */
-.login-container > p {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--spacing-xxl);
-  font-size: 1rem;
-  animation: fadeInUp 0.8s ease-out 0.4s both;
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  opacity: 0.5;
+  transition: all 0.3s ease;
 }
 
-.login-container > p strong {
-  color: var(--white);
+.step.active {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.step.completed {
+  opacity: 0.8;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 600;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+  margin-bottom: var(--spacing-sm);
 }
 
-/* Formulario */
-#login-form {
+.step.active .step-number {
+  background: linear-gradient(135deg, var(--bright-cyan) 0%, var(--accent-teal) 100%);
+  border-color: var(--bright-cyan);
+  color: var(--white);
+  box-shadow: 0 0 0 4px rgba(83, 52, 131, 0.2);
+}
+
+.step.completed .step-number {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--white);
+}
+
+.step.completed .step-number::after {
+  content: '✓';
+  font-size: 0.8rem;
+  position: absolute;
+}
+
+.step-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  transition: color 0.3s ease;
+}
+
+.step.active .step-label {
+  color: var(--white);
+}
+
+.step-line {
+  width: 60px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 var(--spacing-md);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.step-line.completed {
+  background: var(--success);
+}
+
+.step-line.completed::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1s ease-out;
+}
+
+@keyframes shimmer {
+  to { left: 100%; }
+}
+
+/* Tarjeta principal */
+.recovery-card {
   background: var(--glass-effect);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -151,12 +218,13 @@ h1 {
   box-shadow: 
     0 8px 32px var(--shadow-strong),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  animation: fadeInUp 0.8s ease-out 0.6s both;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
   position: relative;
   margin-bottom: var(--spacing-xl);
+  overflow: hidden;
 }
 
-#login-form::before {
+.recovery-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -166,18 +234,58 @@ h1 {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
+/* Formulario */
+.recovery-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.form-content {
+  flex: 1;
+}
+
+/* Títulos y párrafos */
+.recovery-form h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+  background: linear-gradient(135deg, var(--white) 0%, rgba(255, 255, 255, 0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.recovery-form p {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: var(--spacing-xl);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.recovery-form p strong {
+  color: var(--bright-cyan);
+  font-weight: 600;
+}
+
 /* Grupos de formulario */
 .form-group {
   margin-bottom: var(--spacing-lg);
   position: relative;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
 }
 
 .form-group:last-of-type {
   margin-bottom: var(--spacing-xl);
 }
 
-/* Labels */
-label {
+/* Labels reutilizando estilos existentes */
+.recovery-form label {
   display: block;
   margin-bottom: var(--spacing-sm);
   font-weight: 500;
@@ -187,9 +295,8 @@ label {
   transition: color 0.3s ease;
 }
 
-/* Inputs */
-input[type="email"],
-input[type="password"] {
+/* Inputs reutilizando estilos existentes */
+.recovery-form input {
   width: 100%;
   padding: var(--spacing-md) var(--spacing-lg);
   background: rgba(255, 255, 255, 0.05);
@@ -202,15 +309,12 @@ input[type="password"] {
   backdrop-filter: blur(10px);
 }
 
-input[type="email"]::placeholder,
-input[type="password"]::placeholder {
+.recovery-form input::placeholder {
   color: rgba(255, 255, 255, 0.5);
   font-size: 0.95rem;
 }
 
-/* Estados de los inputs */
-input[type="email"]:focus,
-input[type="password"]:focus {
+.recovery-form input:focus {
   outline: none;
   border-color: var(--bright-cyan);
   background: rgba(255, 255, 255, 0.08);
@@ -220,14 +324,45 @@ input[type="password"]:focus {
   transform: translateY(-1px);
 }
 
-input[type="email"]:hover,
-input[type="password"]:hover {
+.recovery-form input:hover {
   border-color: rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.07);
 }
 
-/* Botón principal */
-.btn {
+/* Input especial para código */
+.code-input {
+  text-align: center;
+  font-size: 1.2rem !important;
+  letter-spacing: 0.5em;
+  font-weight: 600;
+}
+
+/* Contenedor de reenvío */
+.resend-container {
+  text-align: center;
+  margin-top: var(--spacing-md);
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.resend-btn {
+  background: none;
+  border: none;
+  color: var(--bright-cyan);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.resend-btn:hover {
+  color: var(--white);
+  text-decoration: none;
+}
+
+/* Botón principal reutilizando estilos existentes */
+.recovery-form .btn {
   width: 100%;
   padding: var(--spacing-lg) var(--spacing-xl);
   background: linear-gradient(135deg, var(--bright-cyan) 0%, var(--accent-teal) 100%);
@@ -246,9 +381,10 @@ input[type="password"]:hover {
   box-shadow: 
     0 4px 15px rgba(83, 52, 131, 0.4),
     0 2px 8px var(--shadow-medium);
+  animation: fadeInUp 0.6s ease-out 0.3s both;
 }
 
-.btn::before {
+.recovery-form .btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -259,7 +395,7 @@ input[type="password"]:hover {
   transition: left 0.5s ease;
 }
 
-.btn:hover {
+.recovery-form .btn:hover {
   transform: translateY(-2px);
   box-shadow: 
     0 6px 20px rgba(83, 52, 131, 0.5),
@@ -267,34 +403,56 @@ input[type="password"]:hover {
   background: linear-gradient(135deg, rgba(83, 52, 131, 1.1) 0%, rgba(15, 52, 96, 1.1) 100%);
 }
 
-.btn:hover::before {
+.recovery-form .btn:hover::before {
   left: 100%;
 }
 
-.btn:active {
+.recovery-form .btn:active {
   transform: translateY(0);
   box-shadow: 
     0 2px 8px rgba(83, 52, 131, 0.3),
     0 1px 4px var(--shadow-medium);
 }
 
-/* Enlaces adicionales */
-.extra-links {
-  text-align: center;
-  animation: fadeInUp 0.8s ease-out 0.8s both;
-  line-height: 1.8;
+/* Acciones de recuperación */
+.recovery-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: fadeInUp 0.8s ease-out 0.6s both;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
 }
 
-.extra-links a {
+.back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--border-radius);
+  color: rgba(255, 255, 255, 0.8);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-family: var(--font-primary);
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
+.login-link {
   color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
   font-size: 0.9rem;
   transition: all 0.3s ease;
   position: relative;
-  display: inline-block;
 }
 
-.extra-links a::after {
+.login-link::after {
   content: '';
   position: absolute;
   bottom: -2px;
@@ -305,83 +463,15 @@ input[type="password"]:hover {
   transition: width 0.3s ease;
 }
 
-.extra-links a:hover {
+.login-link:hover {
   color: var(--white);
 }
 
-.extra-links a:hover::after {
+.login-link:hover::after {
   width: 100%;
 }
 
-/* Estilo especial para el enlace de crear cuenta */
-.create-account {
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-
-.create-account:hover {
-  color: var(--bright-cyan) !important;
-}
-
-.create-account::after {
-  background: var(--bright-cyan) !important;
-}
-
-/* Contenedor del botón de regreso al inicio */
-.back-to-home {
-  text-align: center;
-  margin-top: var(--spacing-xl);
-  animation: fadeInUp 0.8s ease-out 1s both;
-}
-
-/* Botón secundario para regresar al inicio */
-.btn-secondary {
-  display: inline-block;
-  padding: var(--spacing-md) var(--spacing-xl);
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--border-radius);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-  font-weight: 500;
-  font-family: var(--font-primary);
-  text-decoration: none;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-  letter-spacing: 0.025em;
-}
-
-.btn-secondary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  transition: left 0.4s ease;
-}
-
-.btn-secondary:hover {
-  color: var(--white);
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--shadow-medium);
-}
-
-.btn-secondary:hover::before {
-  left: 100%;
-}
-
-.btn-secondary:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px var(--shadow-medium);
-}
-
-/* Popup overlay */
+/* Popup styles (reutilizando del login) */
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -404,7 +494,6 @@ input[type="password"]:hover {
   visibility: visible;
 }
 
-/* Popup principal */
 .popup {
   background: var(--glass-effect);
   backdrop-filter: blur(20px);
@@ -425,7 +514,6 @@ input[type="password"]:hover {
   transform: scale(1) translateY(0);
 }
 
-/* Header del popup */
 .popup-header {
   display: flex;
   align-items: center;
@@ -452,7 +540,6 @@ input[type="password"]:hover {
   margin: 0;
 }
 
-/* Mensaje del popup */
 .popup-message {
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.6;
@@ -460,7 +547,6 @@ input[type="password"]:hover {
   font-size: 0.95rem;
 }
 
-/* Botón del popup */
 .popup-btn {
   width: 100%;
   padding: var(--spacing-md) var(--spacing-lg);
@@ -482,7 +568,7 @@ input[type="password"]:hover {
   box-shadow: 0 4px 12px rgba(83, 52, 131, 0.4);
 }
 
-/* Estilos específicos para popups de error */
+/* Estilos específicos para tipos de popup */
 .popup-error .popup-icon {
   background: rgba(220, 53, 69, 0.2);
   color: #ff6b6b;
@@ -492,7 +578,6 @@ input[type="password"]:hover {
   color: #ff6b6b;
 }
 
-/* Estilos específicos para popups de éxito */
 .popup-success .popup-icon {
   background: rgba(40, 167, 69, 0.2);
   color: #51cf66;
@@ -502,7 +587,6 @@ input[type="password"]:hover {
   color: #51cf66;
 }
 
-/* Estilos específicos para popups informativos */
 .popup-info .popup-icon {
   background: rgba(23, 162, 184, 0.2);
   color: #74c0fc;
@@ -512,7 +596,7 @@ input[type="password"]:hover {
   color: #74c0fc;
 }
 
-/* Animaciones */
+/* Animaciones personalizadas */
 @keyframes fadeInDown {
   from {
     opacity: 0;
@@ -535,47 +619,72 @@ input[type="password"]:hover {
   }
 }
 
+/* Transiciones entre pasos */
+.recovery-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-content {
+  transition: all 0.3s ease;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
-  .login-container {
+  .recovery-container {
     padding: var(--spacing-lg);
     max-width: 100%;
   }
   
-  #login-form {
+  .recovery-card {
     padding: var(--spacing-xl);
   }
   
-  h1 {
-    font-size: 1.75rem;
+  .step-indicator {
+    padding: 0;
   }
   
-  .popup {
-    padding: var(--spacing-xl);
-    max-width: 350px;
+  .step-line {
+    width: 40px;
+    margin: 0 var(--spacing-sm);
+  }
+  
+  .step-label {
+    font-size: 0.7rem;
+  }
+  
+  .recovery-actions {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
-  .login-container {
+  .recovery-container {
     padding: var(--spacing-md);
   }
   
-  #login-form {
+  .recovery-card {
     padding: var(--spacing-lg);
   }
   
-  h1 {
-    font-size: 1.5rem;
+  .recovery-form h2 {
+    font-size: 1.25rem;
   }
   
-  .btn {
-    padding: var(--spacing-md) var(--spacing-lg);
+  .step-number {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
   }
   
-  .btn-secondary {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    font-size: 0.85rem;
+  .step-line {
+    width: 30px;
+    margin: 0 var(--spacing-xs);
+  }
+  
+  .step-label {
+    font-size: 0.65rem;
   }
   
   .popup {
@@ -596,20 +705,21 @@ input[type="password"]:hover {
 }
 
 /* Focus visible para navegación con teclado */
-.btn:focus-visible,
-.btn-secondary:focus-visible,
-input:focus-visible,
-a:focus-visible {
+.recovery-form .btn:focus-visible,
+.recovery-form input:focus-visible,
+.back-btn:focus-visible,
+.login-link:focus-visible,
+.resend-btn:focus-visible {
   outline: 2px solid var(--bright-cyan);
   outline-offset: 2px;
 }
 
 /* Estados de validación para mejor UX */
-input:valid {
+.recovery-form input:valid {
   border-color: rgba(81, 207, 102, 0.5);
 }
 
-input:invalid:not(:placeholder-shown) {
+.recovery-form input:invalid:not(:placeholder-shown) {
   border-color: rgba(255, 107, 107, 0.5);
 }
 
@@ -617,5 +727,80 @@ input:invalid:not(:placeholder-shown) {
 @media (hover: hover) {
   .form-group:hover label {
     color: var(--white);
+  }
+  
+  .step:hover {
+    transform: translateY(-2px);
+  }
+  
+  .step:hover .step-number {
+    box-shadow: 0 4px 12px var(--shadow-medium);
+  }
+}
+
+/* Efectos adicionales para los pasos completados */
+.step.completed .step-number {
+  animation: completedPulse 0.6s ease-out;
+}
+
+@keyframes completedPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Efecto de escritura para el input de código */
+.code-input:focus {
+  animation: codeInputFocus 0.3s ease-out;
+}
+
+@keyframes codeInputFocus {
+  0% { letter-spacing: 0.2em; }
+  100% { letter-spacing: 0.5em; }
+}
+
+/* Transiciones suaves para cambios de paso */
+.recovery-card[data-step="1"] .form-content {
+  animation: slideInLeft 0.4s ease-out;
+}
+
+.recovery-card[data-step="2"] .form-content {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.recovery-card[data-step="3"] .form-content {
+  animation: slideInRight 0.4s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

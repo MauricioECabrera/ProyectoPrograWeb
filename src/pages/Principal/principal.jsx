@@ -1,311 +1,326 @@
-// src/pages/Principal/Principal.jsx
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "./principal.css";
 
-export default function Principal() {
-  const navigate = useNavigate();
-
-  // ---- STATE ----
-  const [isEmotionOpen, setIsEmotionOpen] = useState(false);
-  const [currentTime, setCurrentTime] = useState("--:--");
-  const [cameraActive, setCameraActive] = useState(false);
+export default function AnimaSimplified() {
+  const [emotionPopup, setEmotionPopup] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
   const [analysisVisible, setAnalysisVisible] = useState(false);
-  const [emotion, setEmotion] = useState({ name: "Analizando...", icon: "😊", confidence: "--" });
-  const [playlist, setPlaylist] = useState([]);
-  const [userName] = useState("Usuario");
-
-  // ---- REFS ----
-  const cameraStreamRef = useRef(null); // guarda MediaStream
-  const previewRef = useRef(null);      // div del preview
-
-  // ---- UTILS ----
-  const showNotification = (message, type = "info") => {
-    const notification = document.createElement("div");
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-      <i class="fas fa-info-circle"></i>
-      <span>${message}</span>
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => {
-      notification.style.opacity = "1";
-      notification.style.transform = "translateY(0)";
-    }, 100);
-    setTimeout(() => {
-      notification.style.opacity = "0";
-      notification.style.transform = "translateY(-20px)";
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
-  };
-
-  const formatTime = (d = new Date()) => d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-
-  // ---- EFFECTS ----
-  useEffect(() => {
-    const container = document.querySelector(".container");
-    if (container) {
-      container.style.opacity = "0";
-      container.style.transform = "translateY(20px)";
-      setTimeout(() => {
-        container.style.transition = "all 0.6s ease";
-        container.style.opacity = "1";
-        container.style.transform = "translateY(0)";
-      }, 100);
-    }
-
-    setCurrentTime(formatTime());
-    const t = setInterval(() => setCurrentTime(formatTime()), 60000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    const statNumbers = document.querySelectorAll(".stat-number");
-    statNumbers.forEach((statEl) => {
-      const finalValue = statEl.textContent || "0";
-      if (!isNaN(Number(finalValue))) {
-        let currentValue = 0;
-        const target = Number(finalValue);
-        const increment = target / 30;
-        const timer = setInterval(() => {
-          currentValue += increment;
-          if (currentValue >= target) {
-            statEl.textContent = String(target);
-            clearInterval(timer);
-          } else {
-            statEl.textContent = String(Math.floor(currentValue));
-          }
-        }, 50);
-      }
-    });
-  }, []);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     return () => {
-      if (cameraStreamRef.current) {
-        cameraStreamRef.current.getTracks().forEach((t) => t.stop());
-        cameraStreamRef.current = null;
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [cameraStream]);
 
-  // ---- CÁMARA ----
   const openEmotionAnalysis = () => {
-    setIsEmotionOpen(true);
-    document.body.style.overflow = "hidden";
+    setEmotionPopup(true);
+    document.body.style.overflow = 'hidden';
   };
 
   const closeEmotionModal = () => {
-    setIsEmotionOpen(false);
-    document.body.style.overflow = "auto";
-    if (cameraStreamRef.current) {
-      cameraStreamRef.current.getTracks().forEach((t) => t.stop());
-      cameraStreamRef.current = null;
+    setEmotionPopup(false);
+    document.body.style.overflow = 'auto';
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
     }
     resetCameraInterface();
   };
 
   const startCamera = async () => {
     try {
-      if (!previewRef.current) return;
-      setCameraActive(true);
+      const startBtn = document.getElementById('start-camera');
+      if (startBtn) {
+        startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
+      }
+      
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      cameraStreamRef.current = stream;
-
-      const video = document.createElement("video");
-      video.srcObject = stream;
-      video.autoplay = true;
-      video.style.width = "100%";
-      video.style.borderRadius = "12px";
-      previewRef.current.innerHTML = "";
-      previewRef.current.appendChild(video);
-      showNotification("Cámara activada correctamente");
-    } catch (err) {
-      setCameraActive(false);
-      showNotification("Error al acceder a la cámara", "error");
+      setCameraStream(stream);
+      
+      const videoElement = document.createElement('video');
+      videoElement.srcObject = stream;
+      videoElement.autoplay = true;
+      videoElement.style.width = '100%';
+      videoElement.style.borderRadius = '12px';
+      
+      const preview = document.getElementById('camera-preview');
+      if (preview) {
+        preview.innerHTML = '';
+        preview.appendChild(videoElement);
+      }
+      
+      const takeBtn = document.getElementById('take-photo');
+      if (takeBtn) takeBtn.disabled = false;
+      if (startBtn) startBtn.style.display = 'none';
+      
+      showNotification('Cámara activada correctamente');
+    } catch (error) {
+      showNotification('Error al acceder a la cámara', 'error');
+      const startBtn = document.getElementById('start-camera');
+      if (startBtn) {
+        startBtn.innerHTML = '<i class="fas fa-video"></i> Activar Cámara';
+      }
     }
   };
 
   const capturePhoto = () => {
-    if (!previewRef.current) return;
-    const video = previewRef.current.querySelector("video");
-    if (!video) return;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.drawImage(video, 0, 0);
-
-    showAnalysisResults();
-
-    if (cameraStreamRef.current) {
-      cameraStreamRef.current.getTracks().forEach((t) => t.stop());
-      cameraStreamRef.current = null;
+    if (!cameraStream) return;
+    
+    const video = document.querySelector('#camera-preview video');
+    if (video) {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+      
+      showAnalysisResults();
+      
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
     }
-    setCameraActive(false);
   };
 
   const uploadPhoto = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file || !previewRef.current) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = document.createElement("img");
-        img.src = String(ev.target && ev.target.result ? ev.target.result : "");
-        img.style.width = "100%";
-        img.style.borderRadius = "12px";
-        previewRef.current.innerHTML = "";
-        previewRef.current.appendChild(img);
-        showAnalysisResults();
-      };
-      reader.readAsDataURL(file);
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.width = '100%';
+          img.style.borderRadius = '12px';
+          
+          const preview = document.getElementById('camera-preview');
+          if (preview) {
+            preview.innerHTML = '';
+            preview.appendChild(img);
+          }
+          
+          showAnalysisResults();
+        };
+        reader.readAsDataURL(file);
+      }
     };
     input.click();
   };
 
+  const showAnalysisResults = () => {
+    setAnalysisVisible(true);
+    
+    setTimeout(() => {
+      const emotions = [
+        { name: 'Felicidad', icon: '😊', confidence: 85 },
+        { name: 'Calma', icon: '😌', confidence: 78 },
+        { name: 'Energía', icon: '🎵', confidence: 92 },
+        { name: 'Concentración', icon: '🧘', confidence: 67 }
+      ];
+      
+      const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+      
+      const emotionIcon = document.getElementById('emotion-icon');
+      const emotionName = document.getElementById('emotion-name');
+      const emotionConfidence = document.getElementById('emotion-confidence');
+      
+      if (emotionIcon) emotionIcon.textContent = randomEmotion.icon;
+      if (emotionName) emotionName.textContent = randomEmotion.name;
+      if (emotionConfidence) emotionConfidence.textContent = `Confianza: ${randomEmotion.confidence}%`;
+      
+      generatePlaylist(randomEmotion.name);
+    }, 2000);
+  };
+
+  const generatePlaylist = (emotion) => {
+    const playlists = {
+      'Felicidad': ['Happy - Pharrell Williams', 'Good as Hell - Lizzo', 'Uptown Funk - Bruno Mars'],
+      'Calma': ['Weightless - Marconi Union', 'River - Joni Mitchell', 'Mad World - Gary Jules'],
+      'Energía': ['Eye of the Tiger - Survivor', 'Thunder - Imagine Dragons', 'High Hopes - Panic!'],
+      'Concentración': ['Clair de Lune - Debussy', 'Gymnopédie No.1 - Satie', 'The Blue Notebooks - Max Richter']
+    };
+    
+    const songs = playlists[emotion] || ['Música personalizada para ti'];
+    const playlistDiv = document.getElementById('playlist-preview');
+    
+    if (playlistDiv) {
+      playlistDiv.innerHTML = songs.map(song => 
+        `<div class="song-item">
+          <i class="fas fa-music"></i>
+          <span>${song}</span>
+          <button class="play-song-btn"><i class="fas fa-play"></i></button>
+        </div>`
+      ).join('');
+    }
+  };
+
   const resetCameraInterface = () => {
-    if (previewRef.current) {
-      previewRef.current.innerHTML = `
+    const preview = document.getElementById('camera-preview');
+    const startBtn = document.getElementById('start-camera');
+    const takeBtn = document.getElementById('take-photo');
+    
+    if (preview) {
+      preview.innerHTML = `
         <i class="fas fa-camera camera-icon"></i>
         <p>Activa tu cámara para comenzar</p>
       `;
     }
-    setCameraActive(false);
+    if (startBtn) {
+      startBtn.style.display = 'inline-flex';
+      startBtn.innerHTML = '<i class="fas fa-video"></i> Activar Cámara';
+    }
+    if (takeBtn) takeBtn.disabled = true;
     setAnalysisVisible(false);
-    setEmotion({ name: "Analizando...", icon: "😊", confidence: "--" });
-    setPlaylist([]);
   };
 
-  // ---- ANÁLISIS (SIMULADO) ----
-  const showAnalysisResults = () => {
-    setAnalysisVisible(true);
-    setEmotion({ name: "Analizando...", icon: "😊", confidence: "--" });
-    setPlaylist([]);
-
+  const showNotification = (message, type = 'info') => {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+      <i class="fas fa-info-circle"></i>
+      <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
     setTimeout(() => {
-      const emotions = [
-        { name: "Felicidad", icon: "😊", confidence: 85 },
-        { name: "Calma", icon: "😌", confidence: 78 },
-        { name: "Energía", icon: "🎵", confidence: 92 },
-        { name: "Concentración", icon: "🧘", confidence: 67 },
-      ];
-      const selected = emotions[Math.floor(Math.random() * emotions.length)];
-      setEmotion({
-        name: selected.name,
-        icon: selected.icon,
-        confidence: `${selected.confidence}%`,
-      });
-      generatePlaylist(selected.name);
-    }, 2000);
-  };
-
-  const generatePlaylist = (emo) => {
-    const playlists = {
-      Felicidad: ["Happy - Pharrell Williams", "Good as Hell - Lizzo", "Uptown Funk - Bruno Mars"],
-      Calma: ["Weightless - Marconi Union", "River - Joni Mitchell", "Mad World - Gary Jules"],
-      Energía: ["Eye of the Tiger - Survivor", "Thunder - Imagine Dragons", "High Hopes - Panic!"],
-      Concentración: ["Clair de Lune - Debussy", "Gymnopédie No.1 - Satie", "The Blue Notebooks - Max Richter"],
-    };
-    setPlaylist(playlists[emo] || ["Música personalizada para ti"]);
-  };
-
-  // ---- NAV ----
-  const navigateToHistory = () => {
-    showNotification("Navegando al historial...");
-    navigate("/historial");
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateY(0)';
+    }, 100);
+    
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateY(-20px)';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   };
 
   const handleLogout = () => {
-    // ✅ corregido para ESLint
-    if (window.confirm("¿Estás seguro que deseas cerrar sesión?")) {
-      showNotification("Cerrando sesión...");
-      setTimeout(() => navigate("/login"), 1500);
+    if (window.confirm('¿Estás seguro que deseas cerrar sesión?')) {
+      showNotification('Cerrando sesión...');
     }
   };
 
   return (
-    <>
-      {/* Modal de análisis de emoción */}
-      {isEmotionOpen && (
-        <div id="emotion-popup" className="emotion-popup" style={{ display: "flex" }}>
-          <div className="emotion-modal">
-            <div className="emotion-header">
-              <h3>Análisis de Emoción</h3>
-              <button id="close-emotion" className="close-btn" onClick={closeEmotionModal}>
+    <div className="app-container">
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+        <div className="sidebar-content">
+          {/* Logo */}
+          <div className="sidebar-logo">
+            <div className="logo-icon">
+              <span>🎵</span>
+            </div>
+            <h1 className="logo-text">Ánima</h1>
+          </div>
+
+          {/* Menu Items */}
+          <nav className="sidebar-nav">
+            <button className="nav-item">
+              <i className="fas fa-user"></i>
+              <span>Perfil</span>
+            </button>
+            
+            <button className="nav-item">
+              <i className="fas fa-history"></i>
+              <span>Historial</span>
+            </button>
+          </nav>
+
+          {/* Logout Button */}
+          <button onClick={handleLogout} className="logout-button">
+            <i className="fas fa-sign-out-alt"></i>
+            <span>Salir</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile Menu Toggle */}
+      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="mobile-menu-toggle">
+        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'}`}></i>
+      </button>
+
+      {/* Main Content */}
+      <main className="main-content">
+        <div className="main-container">
+          {/* Main Question Card */}
+          <div className="question-card">
+            <h2 className="question-title">¿Cómo me siento?</h2>
+            
+            {/* Camera Button */}
+            <button onClick={openEmotionAnalysis} className="camera-button">
+              <i className="fas fa-camera"></i>
+              <span>Tomar foto</span>
+            </button>
+          </div>
+        </div>
+      </main>
+
+      {/* Emotion Analysis Modal */}
+      {emotionPopup && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            {/* Modal Header */}
+            <div className="modal-header">
+              <h3 className="modal-title">Análisis de Emoción</h3>
+              <button onClick={closeEmotionModal} className="close-button">
                 <i className="fas fa-times"></i>
               </button>
             </div>
 
-            <div className="emotion-content">
+            {/* Modal Content */}
+            <div className="modal-content">
+              {/* Camera Section */}
               <div className="camera-section">
-                <div className="camera-preview" id="camera-preview" ref={previewRef}>
+                <div id="camera-preview" className="camera-preview">
                   <i className="fas fa-camera camera-icon"></i>
                   <p>Activa tu cámara para comenzar</p>
                 </div>
 
+                {/* Camera Controls */}
                 <div className="camera-controls">
-                  {!cameraActive && (
-                    <button id="start-camera" className="btn-camera primary" onClick={startCamera}>
-                      <i className="fas fa-video"></i> Activar Cámara
-                    </button>
-                  )}
-                  <button
-                    id="take-photo"
-                    className="btn-camera secondary"
-                    onClick={capturePhoto}
-                    disabled={!cameraActive}
-                  >
-                    <i className="fas fa-camera"></i> Capturar Foto
+                  <button id="start-camera" onClick={startCamera} className="btn-camera btn-primary">
+                    <i className="fas fa-video"></i>
+                    Activar Cámara
                   </button>
-                  <button id="upload-photo" className="btn-camera tertiary" onClick={uploadPhoto}>
-                    <i className="fas fa-upload"></i> Subir Imagen
+                  
+                  <button id="take-photo" onClick={capturePhoto} disabled className="btn-camera btn-success">
+                    <i className="fas fa-camera"></i>
+                    Capturar Foto
+                  </button>
+                  
+                  <button onClick={uploadPhoto} className="btn-camera btn-secondary">
+                    <i className="fas fa-upload"></i>
+                    Subir Imagen
                   </button>
                 </div>
               </div>
 
+              {/* Analysis Results */}
               {analysisVisible && (
-                <div className="analysis-section" id="analysis-section">
-                  <div className="emotion-result">
+                <div className="analysis-section">
+                  <div className="analysis-grid">
+                    {/* Emotion Display */}
                     <div className="emotion-display">
-                      <div className="emotion-icon-large" id="emotion-icon">
-                        {emotion.icon}
-                      </div>
-                      <h4 id="emotion-name">{emotion.name}</h4>
-                      <p id="emotion-confidence">Confianza: {emotion.confidence}</p>
+                      <div id="emotion-icon" className="emotion-icon">😊</div>
+                      <h4 id="emotion-name" className="emotion-name">Analizando...</h4>
+                      <p id="emotion-confidence" className="emotion-confidence">Confianza: --</p>
                     </div>
 
-                    <div className="music-recommendations">
-                      <h5>Recomendaciones musicales:</h5>
-                      <div className="playlist-preview" id="playlist-preview">
-                        {playlist.length === 0 ? (
-                          <div className="loading-music">
-                            <i className="fas fa-spinner fa-spin"></i>
-                            <span>Generando playlist...</span>
-                          </div>
-                        ) : (
-                          playlist.map((song, idx) => (
-                            <div className="song-item" key={idx}>
-                              <i className="fas fa-music"></i>
-                              <span>{song}</span>
-                              <button
-                                className="play-song-btn"
-                                onClick={(e) => {
-                                  const btn = e.currentTarget;
-                                  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                                  setTimeout(() => (btn.innerHTML = '<i class="fas fa-play"></i>'), 1000);
-                                  showNotification("Reproduciendo canción...");
-                                }}
-                              >
-                                <i className="fas fa-play"></i>
-                              </button>
-                            </div>
-                          ))
-                        )}
+                    {/* Music Recommendations */}
+                    <div className="music-section">
+                      <h5 className="music-title">Recomendaciones musicales:</h5>
+                      <div id="playlist-preview" className="playlist-preview">
+                        <div className="loading-music">
+                          <i className="fas fa-spinner fa-spin"></i>
+                          <span>Generando playlist...</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -315,38 +330,6 @@ export default function Principal() {
           </div>
         </div>
       )}
-
-      {/* CONTENIDO PRINCIPAL */}
-      <div className="container">
-        <header className="header">
-          <div className="logo-section">
-            <img src="/Assets/logo-anima.png" alt="Logo" />
-            <h1 className="app-name">Ánima</h1>
-          </div>
-          <nav className="nav-menu">
-            <button className="nav-btn" id="profileBtn" onClick={() => showNotification("Abriendo perfil...")}>
-              <i className="fas fa-user"></i>
-              <span>Perfil</span>
-            </button>
-            <button className="nav-btn" id="settingsBtn" onClick={() => showNotification("Abriendo configuración...")}>
-              <i className="fas fa-cog"></i>
-              <span>Configuración</span>
-            </button>
-            <button className="nav-btn logout-btn" id="logoutBtn" onClick={handleLogout}>
-              <i className="fas fa-sign-out-alt"></i>
-              <span>Salir</span>
-            </button>
-          </nav>
-        </header>
-
-        {/* Resto de secciones igual que tu archivo original */}
-      </div>
-
-      {/* FAB */}
-      <button className="fab" id="quickAnalysisBtn" onClick={openEmotionAnalysis}>
-        <i className="fas fa-camera"></i>
-        <div className="fab-pulse"></div>
-      </button>
-    </>
+    </div>
   );
 }

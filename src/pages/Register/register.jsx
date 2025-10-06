@@ -163,6 +163,13 @@ export default function Register() {
         <div className="extra-links">
           <Link to="/login">¿Ya tienes cuenta? Inicia sesión</Link>
         </div>
+
+        {/* Botón de regreso al inicio */}
+        <div className="back-to-home">
+          <Link to="/index" className="btn-secondary">
+            ← Volver al inicio
+          </Link>
+        </div>
       </div>
     </>
   );
