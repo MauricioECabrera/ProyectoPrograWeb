@@ -38,21 +38,44 @@ export default function Login() {
     setPopup({ ...popup, show: false });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validation = validateLoginForm(formData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const validation = validateLoginForm(formData);
 
-    if (!validation.isValid) {
-      showPopup("error", "Error de validación", validation.error);
+  if (!validation.isValid) {
+    showPopup("error", "Error de validación", validation.error);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showPopup("error", "Error de inicio de sesión", data.message || "Correo o contraseña incorrectos");
       return;
     }
 
-    // Simulación de login exitoso
+    // Guardar token y usuario en localStorage
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
     showPopup("success", "¡Inicio de sesión exitoso!", "Bienvenido de nuevo. Serás redirigido a la aplicación principal.");
+
     setTimeout(() => {
-      showPopup("info", "Demo", "En una aplicación real, serías redirigido a la página principal de Ánima.");
+      window.location.href = "/principal"; // redirigir a la vista principal
     }, 2000);
-  };
+  } catch (err) {
+    console.error(err);
+    showPopup("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta nuevamente.");
+  }
+};
+
 
   return (
     <>
