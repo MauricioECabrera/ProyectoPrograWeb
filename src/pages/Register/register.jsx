@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { register as apiRegister } from '../../utils/api';
 import "./register.css";
 
 export default function Register() {
@@ -68,22 +69,7 @@ const handleSubmit = async (e) => {
   }
 
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showPopup("error", "Error al registrarse", data.message || "No se pudo crear la cuenta");
-      return;
-    }
+    const data = await apiRegister(formData.name, formData.email, formData.password);
 
     showPopup("success", "¡Registro exitoso!", "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.");
 
