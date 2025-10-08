@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { login as apiLogin } from '../../utils/api';
 import "./login.css";
 
 export default function Login() {
@@ -48,18 +49,7 @@ const handleSubmit = async (e) => {
   }
 
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showPopup("error", "Error de inicio de sesión", data.message || "Correo o contraseña incorrectos");
-      return;
-    }
+    const data = await apiLogin(formData.email, formData.password);
 
     // Guardar token y usuario en localStorage
     localStorage.setItem("token", data.token);
@@ -72,7 +62,7 @@ const handleSubmit = async (e) => {
     }, 2000);
   } catch (err) {
     console.error(err);
-    showPopup("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta nuevamente.");
+    showPopup("error", "Error de conexión", err.message || "No se pudo conectar con el servidor. Intenta nuevamente.");
   }
 };
 
