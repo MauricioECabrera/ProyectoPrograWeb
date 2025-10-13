@@ -1,4 +1,3 @@
-
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
@@ -134,7 +133,7 @@ class AuthService:
         if not password or len(password) < 6:
             return None, None, "La contraseña debe tener al menos 6 caracteres"
         
-        # Delegate validation + creation to UserService
+        # Delegar creación a UserService (que maneja errores de duplicado)
         user, err = UserService.create_user(name, email, password)
         if err:
             return None, None, err

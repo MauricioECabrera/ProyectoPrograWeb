@@ -2,6 +2,7 @@ from typing import Optional, Tuple
 from datetime import timedelta
 import bcrypt
 from email_validator import validate_email, EmailNotValidError
+from psycopg import errors as pg_errors
 
 from repositories.user_repository import UserRepository
 from models.user import User
@@ -53,6 +54,14 @@ class UserService:
             if not user:
                 return None, "Error al crear el usuario"
             return user, None
+        except pg_errors.UniqueViolation:
+            # Captura específica para violación de constraint único (email duplicado)
+            print(f"⚠️ Intento de registro con email duplicado: {email}")
+            return None, "Este correo electrónico ya está registrado"
+        except pg_errors.IntegrityError as e:
+            # Otros errores de integridad
+            print(f"❌ Error de integridad en UserService.create_user: {e}")
+            return None, "Error de validación de datos"
         except Exception as e:
-            print(f"❌ Error en UserService.create_user: {e}")
+            print(f"❌ Error inesperado en UserService.create_user: {e}")
             return None, "Error interno del servidor"

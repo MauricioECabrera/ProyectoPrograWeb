@@ -58,30 +58,57 @@ export default function Register() {
     setPopup({ ...popup, show: false });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const validation = validateForm(formData);
+    const validation = validateForm(formData);
 
-  if (!validation.isValid) {
-    showPopup("error", "Error de validación", validation.error);
-    return;
-  }
+    if (!validation.isValid) {
+      showPopup("error", "Error de validación", validation.error);
+      return;
+    }
 
-  try {
-    const data = await apiRegister(formData.name, formData.email, formData.password);
+    try {
+      const data = await apiRegister(formData.name, formData.email, formData.password);
 
-    showPopup("success", "¡Registro exitoso!", "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.");
+      showPopup(
+        "success", 
+        "¡Registro exitoso!", 
+        "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión."
+      );
 
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
-  } catch (err) {
-    console.error(err);
-    showPopup("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta nuevamente.");
-  }
-};
-
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (err) {
+      console.error("Error en registro:", err);
+      
+      // Extraer el mensaje de error del backend
+      let errorMessage = "No se pudo conectar con el servidor. Intenta nuevamente.";
+      let errorTitle = "Error de conexión";
+      
+      if (err.message) {
+        // Si el backend envió un mensaje específico
+        if (err.message.includes("correo electrónico ya está registrado") || 
+            err.message.includes("email") || 
+            err.message.includes("ya existe")) {
+          errorTitle = "Correo ya registrado";
+          errorMessage = "Este correo electrónico ya está registrado. Por favor, inicia sesión o usa otro correo.";
+        } else if (err.message.includes("nombre")) {
+          errorTitle = "Error en el nombre";
+          errorMessage = err.message;
+        } else if (err.message.includes("contraseña")) {
+          errorTitle = "Error en la contraseña";
+          errorMessage = err.message;
+        } else {
+          errorTitle = "Error en el registro";
+          errorMessage = err.message;
+        }
+      }
+      
+      showPopup("error", errorTitle, errorMessage);
+    }
+  };
 
   return (
     <>
@@ -102,7 +129,11 @@ const handleSubmit = async (e) => {
           </div>
         </div>
       )}
-
+      <div className="back-to-home">
+          <Link to="/index" className="btn-secondary">
+            ← Volver al inicio
+          </Link>
+        </div>
       {/* Register Container */}
       <div className="login-container">
         <div className="logo">
@@ -173,11 +204,7 @@ const handleSubmit = async (e) => {
         </div>
 
         {/* Botón de regreso al inicio */}
-        <div className="back-to-home">
-          <Link to="/index" className="btn-secondary">
-            ← Volver al inicio
-          </Link>
-        </div>
+        
       </div>
     </>
   );

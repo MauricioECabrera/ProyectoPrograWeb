@@ -39,33 +39,61 @@ export default function Login() {
     setPopup({ ...popup, show: false });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const validation = validateLoginForm(formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validation = validateLoginForm(formData);
 
-  if (!validation.isValid) {
-    showPopup("error", "Error de validación", validation.error);
-    return;
-  }
+    if (!validation.isValid) {
+      showPopup("error", "Error de validación", validation.error);
+      return;
+    }
 
-  try {
-    const data = await apiLogin(formData.email, formData.password);
+    try {
+      const data = await apiLogin(formData.email, formData.password);
 
-    // Guardar token y usuario en localStorage
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+      // Guardar token y usuario en localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    showPopup("success", "¡Inicio de sesión exitoso!", "Bienvenido de nuevo. Serás redirigido a la aplicación principal.");
+      showPopup(
+        "success", 
+        "¡Inicio de sesión exitoso!", 
+        "Bienvenido de nuevo. Serás redirigido a la aplicación principal."
+      );
 
-    setTimeout(() => {
-      window.location.href = "/principal"; // redirigir a la vista principal
-    }, 2000);
-  } catch (err) {
-    console.error(err);
-    showPopup("error", "Error de conexión", err.message || "No se pudo conectar con el servidor. Intenta nuevamente.");
-  }
-};
-
+      setTimeout(() => {
+        window.location.href = "/principal";
+      }, 2000);
+    } catch (err) {
+      console.error("Error en login:", err);
+      
+      // Extraer el mensaje de error del backend
+      let errorMessage = "No se pudo conectar con el servidor. Intenta nuevamente.";
+      let errorTitle = "Error de conexión";
+      
+      if (err.message) {
+        // Si el backend envió un mensaje específico
+        if (err.message.includes("incorrectos") || 
+            err.message.includes("Correo o contraseña") ||
+            err.status === 401) {
+          errorTitle = "Credenciales incorrectas";
+          errorMessage = "El correo o la contraseña son incorrectos. Por favor, verifica tus datos.";
+        } else if (err.message.includes("no encontrado") || 
+                   err.message.includes("Usuario no")) {
+          errorTitle = "Usuario no encontrado";
+          errorMessage = "No existe una cuenta con este correo electrónico. ¿Deseas crear una cuenta?";
+        } else if (err.message.includes("servidor") || err.status >= 500) {
+          errorTitle = "Error del servidor";
+          errorMessage = "Hubo un problema con el servidor. Por favor, intenta más tarde.";
+        } else {
+          errorTitle = "Error de inicio de sesión";
+          errorMessage = err.message;
+        }
+      }
+      
+      showPopup("error", errorTitle, errorMessage);
+    }
+  };
 
   return (
     <>
@@ -86,7 +114,12 @@ const handleSubmit = async (e) => {
           </div>
         </div>
       )}
-
+      {/* Botón de regreso al inicio */}
+        <div className="back-to-home">
+          <Link to="/index" className="btn-secondary">
+            ← Volver al inicio
+          </Link>
+        </div>
       {/* Login Container */}
       <div className="login-container">
         <div className="logo">
@@ -139,12 +172,7 @@ const handleSubmit = async (e) => {
           </Link>
         </div>
 
-        {/* Botón de regreso al inicio */}
-        <div className="back-to-home">
-          <Link to="/index" className="btn-secondary">
-            ← Volver al inicio
-          </Link>
-        </div>
+        
       </div>
     </>
   );
