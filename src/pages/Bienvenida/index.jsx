@@ -1,10 +1,12 @@
+// ===== 1. ACTUALIZACIÓN DE index.jsx =====
+// src/pages/Bienvenida/index.jsx
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import Navbar from "../../components/Navbar";
 import "./index.css";
 
 export default function Bienvenida() {
   useEffect(() => {
-    // Animaciones al hacer scroll
     const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -23,24 +25,8 @@ export default function Bienvenida() {
 
   return (
     <>
-      {/* Header/Navigation */}
-      <header className="header">
-        <div className="container">
-          <nav className="nav">
-            <div className="logo-header">
-              {/* 👇 clase para controlar tamaño del logo */}
-              <img className="logo-img" src="/Assets/logo-anima.png" alt="Logo Ánima" />
-              <span className="logo-text">Ánima</span>
-            </div>
-            <div className="nav-links">
-              <Link to="/register" className="nav-link">Crear cuenta</Link>
-              <Link to="/login" className="nav-link btn-outline">Iniciar sesión</Link>
-            </div>
-          </nav>
-        </div>
-      </header>
+      <Navbar variant="default" />
 
-      {/* 👇 Compensar el header fijo */}
       <main className="page-content">
         {/* Hero Section */}
         <section className="hero">
@@ -78,6 +64,7 @@ export default function Bienvenida() {
           </div>
         </section>
 
+        {/* Resto del contenido igual... */}
         {/* How it Works Section */}
         <section className="section how-it-works">
           <div className="container">
@@ -178,7 +165,6 @@ export default function Bienvenida() {
           <div className="footer-content">
             <div className="footer-brand">
               <div className="logo-header">
-                {/* 👇 también pequeño en el footer */}
                 <img className="logo-img" src="/Assets/logo-anima.png" alt="Logo Ánima" />
                 <span className="logo-text">Ánima</span>
               </div>

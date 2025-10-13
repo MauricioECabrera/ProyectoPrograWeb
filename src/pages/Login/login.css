@@ -86,14 +86,15 @@ body::before {
 .login-container {
   max-width: 400px;
   margin: 0 auto;
-  padding: 1rem 1.5rem;
-  height: 100vh;
+  padding: var(--spacing-xl);
+  min-height: 100vh;
+  padding-top: -1000px; /* 👈 CAMBIAR de 120px a 100px */
+  padding-bottom: var(--spacing-xl); /* 👈 AGREGAR para balance */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; /* 👈 CAMBIAR de center a flex-start */
   position: relative;
   z-index: 1;
-  overflow: hidden;
 }
 
 /* Logo - ✅ REDUCIDO */

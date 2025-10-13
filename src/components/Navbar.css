@@ -1,0 +1,195 @@
+/* src/components/Navbar/Navbar.css */
+
+/* Variables CSS (aseguramos que estén disponibles) */
+:root {
+  --primary-dark: #1a1a2e;
+  --primary-blue: #16213e;
+  --accent-teal: #0f3460;
+  --bright-cyan: #533483;
+  --white: #ffffff;
+  --overlay-dark: rgba(26, 26, 46, 0.95);
+  --glass-effect: rgba(255, 255, 255, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.2);
+  --border-radius-sm: 8px;
+  --spacing-md: 1rem;
+}
+
+/* ===== HEADER ===== */
+.header {
+  padding: 15px 0;
+  background: var(--overlay-dark);
+  backdrop-filter: blur(20px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.logo-header:hover {
+  transform: scale(1.02);
+}
+
+.logo-img {
+  width: 35px;
+  height: 35px;
+  filter: drop-shadow(0 2px 8px var(--shadow-medium));
+  transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+  transform: scale(1.05) rotate(5deg);
+}
+
+.logo-text {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  background: linear-gradient(135deg, var(--white) 0%, rgba(255, 255, 255, 0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-links {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.3s ease;
+  font-size: 14px;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--bright-cyan);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--bright-cyan);
+  transform: translateY(-1px);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.btn-outline {
+  border: 1px solid var(--bright-cyan);
+  color: var(--bright-cyan) !important;
+  background: var(--glass-effect);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(83, 52, 131, 0.2);
+}
+
+.btn-outline:hover {
+  background: var(--bright-cyan);
+  color: var(--white) !important;
+  box-shadow: 0 4px 15px rgba(83, 52, 131, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-outline::after {
+  display: none;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .header {
+    padding: 12px 0;
+  }
+
+  .header .container {
+    padding: 0 15px;
+  }
+
+  .logo-img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .logo-text {
+    font-size: 18px;
+  }
+
+  .nav-links {
+    gap: 10px;
+  }
+
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-links {
+    gap: 8px;
+  }
+
+  .nav-link {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .logo-text {
+    font-size: 16px;
+  }
+  
+  .logo-img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ===== FOCUS STYLES ===== */
+.nav-link:focus-visible,
+.logo-header:focus-visible {
+  outline: 2px solid var(--bright-cyan);
+  outline-offset: 2px;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+  .nav-link,
+  .logo-header,
+  .logo-img {
+    transition-duration: 0.01ms !important;
+  }
+}

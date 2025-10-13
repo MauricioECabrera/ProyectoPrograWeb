@@ -1,6 +1,8 @@
+// src/pages/Register/register.jsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { register as apiRegister } from '../../utils/api';
+import Navbar from "../../components/Navbar";
 import "./register.css";
 
 export default function Register() {
@@ -71,47 +73,21 @@ export default function Register() {
     try {
       const data = await apiRegister(formData.name, formData.email, formData.password);
 
-      showPopup(
-        "success", 
-        "¡Registro exitoso!", 
-        "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión."
-      );
+      showPopup("success", "¡Registro exitoso!", "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.");
 
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (err) {
-      console.error("Error en registro:", err);
-      
-      // Extraer el mensaje de error del backend
-      let errorMessage = "No se pudo conectar con el servidor. Intenta nuevamente.";
-      let errorTitle = "Error de conexión";
-      
-      if (err.message) {
-        // Si el backend envió un mensaje específico
-        if (err.message.includes("correo electrónico ya está registrado") || 
-            err.message.includes("email") || 
-            err.message.includes("ya existe")) {
-          errorTitle = "Correo ya registrado";
-          errorMessage = "Este correo electrónico ya está registrado. Por favor, inicia sesión o usa otro correo.";
-        } else if (err.message.includes("nombre")) {
-          errorTitle = "Error en el nombre";
-          errorMessage = err.message;
-        } else if (err.message.includes("contraseña")) {
-          errorTitle = "Error en la contraseña";
-          errorMessage = err.message;
-        } else {
-          errorTitle = "Error en el registro";
-          errorMessage = err.message;
-        }
-      }
-      
-      showPopup("error", errorTitle, errorMessage);
+      console.error(err);
+      showPopup("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta nuevamente.");
     }
   };
 
   return (
     <>
+      <Navbar variant="register" />
+
       {/* Popup */}
       {popup.show && (
         <div id="popup-overlay" className="popup-overlay show" onClick={closePopup}>
@@ -129,17 +105,9 @@ export default function Register() {
           </div>
         </div>
       )}
-      <div className="back-to-home">
-          <Link to="/index" className="btn-secondary">
-            ← Volver al inicio
-          </Link>
-        </div>
+
       {/* Register Container */}
       <div className="login-container">
-        <div className="logo">
-          <img src="/Assets/logo-anima.png" alt="Logo" />
-        </div>
-
         <h1>Crear Cuenta</h1>
         <p>
           Únete a <strong>Ánima</strong> y comienza ahora
@@ -198,13 +166,6 @@ export default function Register() {
             Registrarse
           </button>
         </form>
-
-        <div className="extra-links">
-          <Link to="/login">¿Ya tienes cuenta? Inicia sesión</Link>
-        </div>
-
-        {/* Botón de regreso al inicio */}
-        
       </div>
     </>
   );
