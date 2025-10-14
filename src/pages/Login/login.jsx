@@ -1,6 +1,8 @@
+// src/pages/Login/login.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { login as apiLogin } from '../../utils/api';
+import Navbar from "../../components/Navbar";
 import "./login.css";
 
 export default function Login() {
@@ -39,36 +41,36 @@ export default function Login() {
     setPopup({ ...popup, show: false });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const validation = validateLoginForm(formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validation = validateLoginForm(formData);
 
-  if (!validation.isValid) {
-    showPopup("error", "Error de validación", validation.error);
-    return;
-  }
+    if (!validation.isValid) {
+      showPopup("error", "Error de validación", validation.error);
+      return;
+    }
 
-  try {
-    const data = await apiLogin(formData.email, formData.password);
+    try {
+      const data = await apiLogin(formData.email, formData.password);
 
-    // Guardar token y usuario en localStorage
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    showPopup("success", "¡Inicio de sesión exitoso!", "Bienvenido de nuevo. Serás redirigido a la aplicación principal.");
+      showPopup("success", "¡Inicio de sesión exitoso!", "Bienvenido de nuevo. Serás redirigido a la aplicación principal.");
 
-    setTimeout(() => {
-      window.location.href = "/principal"; // redirigir a la vista principal
-    }, 2000);
-  } catch (err) {
-    console.error(err);
-    showPopup("error", "Error de conexión", err.message || "No se pudo conectar con el servidor. Intenta nuevamente.");
-  }
-};
-
+      setTimeout(() => {
+        window.location.href = "/principal";
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      showPopup("error", "Error de conexión", err.message || "No se pudo conectar con el servidor. Intenta nuevamente.");
+    }
+  };
 
   return (
     <>
+      <Navbar variant="login" />
+
       {/* Popup */}
       {popup.show && (
         <div id="popup-overlay" className="popup-overlay show" onClick={closePopup}>
@@ -89,9 +91,7 @@ const handleSubmit = async (e) => {
 
       {/* Login Container */}
       <div className="login-container">
-        <div className="logo">
-          <img src="/Assets/logo-anima.png" alt="Logo" />
-        </div>
+       
 
         <h1>Iniciar Sesión</h1>
         <p>
@@ -136,13 +136,6 @@ const handleSubmit = async (e) => {
           <br />
           <Link to="/register" className="create-account">
             Crear una cuenta nueva
-          </Link>
-        </div>
-
-        {/* Botón de regreso al inicio */}
-        <div className="back-to-home">
-          <Link to="/index" className="btn-secondary">
-            ← Volver al inicio
           </Link>
         </div>
       </div>

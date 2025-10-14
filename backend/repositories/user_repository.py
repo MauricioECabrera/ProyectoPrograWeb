@@ -18,6 +18,11 @@ class UserRepository:
             
         Returns:
             User: Usuario creado o None si falla
+            
+        Raises:
+            psycopg.errors.UniqueViolation: Si el email ya existe
+            psycopg.errors.IntegrityError: Si hay otro error de integridad
+            Exception: Para otros errores
         """
         query = """
             INSERT INTO users (name, email, password_hash)
@@ -33,6 +38,7 @@ class UserRepository:
                 return User.from_db_row(row)
         except Exception as e:
             print(f"❌ Error al crear usuario: {e}")
+            # Re-lanzar la excepción para que sea manejada por el servicio
             raise
     
     @staticmethod
@@ -134,4 +140,6 @@ class UserRepository:
                 return result['exists'] if result else False
         except Exception as e:
             print(f"❌ Error al verificar email: {e}")
+            # En caso de error, retornar False para no bloquear el registro
+            # La verificación real se hará en el INSERT con el constraint
             return False

@@ -1,6 +1,8 @@
+// src/pages/Register/register.jsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { register as apiRegister } from '../../utils/api';
+import Navbar from "../../components/Navbar";
 import "./register.css";
 
 export default function Register() {
@@ -58,33 +60,34 @@ export default function Register() {
     setPopup({ ...popup, show: false });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const validation = validateForm(formData);
+    const validation = validateForm(formData);
 
-  if (!validation.isValid) {
-    showPopup("error", "Error de validación", validation.error);
-    return;
-  }
+    if (!validation.isValid) {
+      showPopup("error", "Error de validación", validation.error);
+      return;
+    }
 
-  try {
-    const data = await apiRegister(formData.name, formData.email, formData.password);
+    try {
+      const data = await apiRegister(formData.name, formData.email, formData.password);
 
-    showPopup("success", "¡Registro exitoso!", "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.");
+      showPopup("success", "¡Registro exitoso!", "Tu cuenta ha sido creada correctamente. Serás redirigido al inicio de sesión.");
 
-    setTimeout(() => {
-      navigate("/login");
-    }, 2000);
-  } catch (err) {
-    console.error(err);
-    showPopup("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta nuevamente.");
-  }
-};
-
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      showPopup("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta nuevamente.");
+    }
+  };
 
   return (
     <>
+      <Navbar variant="register" />
+
       {/* Popup */}
       {popup.show && (
         <div id="popup-overlay" className="popup-overlay show" onClick={closePopup}>
@@ -105,10 +108,6 @@ const handleSubmit = async (e) => {
 
       {/* Register Container */}
       <div className="login-container">
-        <div className="logo">
-          <img src="/Assets/logo-anima.png" alt="Logo" />
-        </div>
-
         <h1>Crear Cuenta</h1>
         <p>
           Únete a <strong>Ánima</strong> y comienza ahora
@@ -167,17 +166,6 @@ const handleSubmit = async (e) => {
             Registrarse
           </button>
         </form>
-
-        <div className="extra-links">
-          <Link to="/login">¿Ya tienes cuenta? Inicia sesión</Link>
-        </div>
-
-        {/* Botón de regreso al inicio */}
-        <div className="back-to-home">
-          <Link to="/index" className="btn-secondary">
-            ← Volver al inicio
-          </Link>
-        </div>
       </div>
     </>
   );

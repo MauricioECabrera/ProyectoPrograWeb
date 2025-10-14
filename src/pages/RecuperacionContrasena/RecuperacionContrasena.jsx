@@ -1,5 +1,6 @@
+// src/pages/RecuperacionContrasena/RecuperacionContrasena.jsx
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Navbar from "../../components/Navbar";
 import "./RecuperacionContrasena.css";
 
 export default function RecuperacionContrasena() {
@@ -76,7 +77,6 @@ export default function RecuperacionContrasena() {
       return;
     }
 
-    // Simulación de envío de código
     showPopup("success", "¡Código enviado!", `Se ha enviado un código de verificación a ${formData.email}`);
     setTimeout(() => {
       setCurrentStep(2);
@@ -93,7 +93,6 @@ export default function RecuperacionContrasena() {
       return;
     }
 
-    // Simulación de verificación de código
     if (formData.verificationCode !== "123456") {
       showPopup("error", "Código incorrecto", "El código ingresado no es válido. Intenta nuevamente.");
       return;
@@ -115,7 +114,6 @@ export default function RecuperacionContrasena() {
       return;
     }
 
-    // Simulación de cambio de contraseña
     showPopup("success", "¡Contraseña actualizada!", "Tu contraseña ha sido cambiada exitosamente. Serás redirigido al login.");
     setTimeout(() => {
       showPopup("info", "Redirigiendo...", "En una aplicación real, serías redirigido al login para usar tu nueva contraseña.");
@@ -249,6 +247,8 @@ export default function RecuperacionContrasena() {
 
   return (
     <>
+      <Navbar variant="recovery" />
+
       {/* Popup */}
       {popup.show && (
         <div className="popup-overlay show" onClick={closePopup}>
@@ -269,10 +269,7 @@ export default function RecuperacionContrasena() {
 
       {/* Main Container */}
       <div className="recovery-container">
-        <div className="logo">
-          <img src="/Assets/logo-anima.png" alt="Logo" />
-        </div>
-
+        
         {renderStepIndicator()}
 
         <div className="recovery-card">
@@ -281,17 +278,13 @@ export default function RecuperacionContrasena() {
           {currentStep === 3 && renderStep3()}
         </div>
 
-        <div className="recovery-actions">
-          {currentStep > 1 && (
+        {currentStep > 1 && (
+          <div className="recovery-actions">
             <button className="back-btn" onClick={handleBack}>
               ← Volver
             </button>
-          )}
-          
-          <Link to="/login" className="login-link">
-            Volver al inicio de sesión
-          </Link>
-        </div>
+          </div>
+        )}
       </div>
     </>
   );

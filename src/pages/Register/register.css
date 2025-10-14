@@ -81,28 +81,29 @@ body::before {
   50% { opacity: 0.8; }
 }
 
-/* Contenedor principal */
+/* Contenedor principal - ✅ OPTIMIZADO PARA NO SCROLL */
 .login-container {
   max-width: 420px;
   margin: 0 auto;
-  padding: var(--spacing-xl);
-  min-height: 100vh;
+  padding: 1rem 1.5rem;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
-/* Logo */
+/* Logo - ✅ REDUCIDO */
 .logo {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 1rem;
   animation: fadeInDown 0.8s ease-out;
 }
 
 .logo img {
-  max-width: 80px;
+  max-width: 60px;
   height: auto;
   filter: drop-shadow(0 4px 12px var(--shadow-medium));
   transition: transform 0.3s ease;
@@ -112,13 +113,13 @@ body::before {
   transform: scale(1.05);
 }
 
-/* Títulos */
+/* Títulos - ✅ REDUCIDO */
 h1 {
   font-family: var(--font-heading);
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 0.5rem;
   background: linear-gradient(135deg, var(--white) 0%, rgba(255, 255, 255, 0.8) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -126,12 +127,12 @@ h1 {
   animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
-/* Párrafo descriptivo */
+/* Párrafo descriptivo - ✅ REDUCIDO */
 .login-container > p {
   text-align: center;
   color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--spacing-xxl);
-  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
   animation: fadeInUp 0.8s ease-out 0.4s both;
 }
 
@@ -140,13 +141,13 @@ h1 {
   font-weight: 600;
 }
 
-/* Formulario */
+/* Formulario - ✅ REDUCIDO */
 #register-form {
   background: var(--glass-effect);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--border-radius-lg);
-  padding: var(--spacing-xxl);
+  padding: 1.5rem;
   box-shadow: 
     0 8px 32px var(--shadow-strong),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -164,14 +165,14 @@ h1 {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
-/* Grupos de formulario */
+/* Grupos de formulario - ✅ REDUCIDO */
 .form-group {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 1rem;
   position: relative;
 }
 
 .form-group:last-of-type {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 1.25rem;
 }
 
 /* Labels */
@@ -185,17 +186,17 @@ label {
   transition: color 0.3s ease;
 }
 
-/* Inputs */
+/* Inputs - ✅ REDUCIDO */
 input[type="text"],
 input[type="email"],
 input[type="password"] {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--border-radius);
   color: var(--white);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-family: var(--font-primary);
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -228,15 +229,15 @@ input[type="password"]:hover {
   background: rgba(255, 255, 255, 0.07);
 }
 
-/* Botón principal */
+/* Botón principal - ✅ REDUCIDO */
 .btn {
   width: 100%;
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: 0.875rem 1.5rem;
   background: linear-gradient(135deg, var(--bright-cyan) 0%, var(--accent-teal) 100%);
   border: none;
   border-radius: var(--border-radius);
   color: var(--white);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   font-family: var(--font-primary);
   cursor: pointer;
@@ -280,10 +281,10 @@ input[type="password"]:hover {
     0 1px 4px var(--shadow-medium);
 }
 
-/* Enlaces adicionales */
+/* Enlaces adicionales - ✅ REDUCIDO */
 .extra-links {
   text-align: center;
-  margin-top: var(--spacing-xl);
+  margin-top: 1rem;
   animation: fadeInUp 0.8s ease-out 0.8s both;
 }
 
@@ -318,10 +319,11 @@ input[type="password"]:hover {
 .back-to-home {
   text-align: center;
   margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl); /* ✅ Añadido margen inferior */
   animation: fadeInUp 0.8s ease-out 1s both;
 }
 
-/* Botón secundario fijo arriba a la izquierda */
+/* Botón secundario - ✅ COMPLETAMENTE CORREGIDO */
 .btn-secondary {
   display: inline-block;
   padding: var(--spacing-md) var(--spacing-xl);
@@ -334,15 +336,12 @@ input[type="password"]:hover {
   font-family: var(--font-primary);
   text-decoration: none;
   transition: all 0.3s ease;
-  position: fixed;      /* 🔒 siempre visible */
-  top: -1000px;            /* distancia desde arriba */
-  left: -800px;           /* distancia desde la izquierda */
-  z-index: 1000;        /* asegura que esté sobre todo */
+  position: relative; /* ✅ Cambiado de fixed a relative */
   overflow: hidden;
   backdrop-filter: blur(10px);
   letter-spacing: 0.025em;
+  /* ✅ Removidos top y left negativos */
 }
-
 
 .btn-secondary::before {
   content: '';
@@ -519,49 +518,58 @@ input[type="password"]:hover {
 /* Responsive design */
 @media (max-width: 768px) {
   .login-container {
-    padding: var(--spacing-lg);
+    padding: 1rem;
     max-width: 100%;
   }
   
   #register-form {
-    padding: var(--spacing-xl);
-  }
-  
-  h1 {
-    font-size: 1.75rem;
-  }
-  
-  .popup {
-    padding: var(--spacing-xl);
-    max-width: 350px;
-  }
-}
-
-@media (max-width: 480px) {
-  .login-container {
-    padding: var(--spacing-md);
-  }
-  
-  #register-form {
-    padding: var(--spacing-lg);
+    padding: 1.25rem;
   }
   
   h1 {
     font-size: 1.5rem;
   }
   
-  .btn {
-    padding: var(--spacing-md) var(--spacing-lg);
+  .popup {
+    padding: 1.5rem;
+    max-width: 350px;
   }
   
   .btn-secondary {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    font-size: 0.85rem;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 0.75rem;
+  }
+  
+  #register-form {
+    padding: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.375rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.25rem;
   }
   
   .popup {
-    padding: var(--spacing-lg);
+    padding: 1.25rem;
     width: 95%;
+  }
+  
+  .btn-secondary {
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.5rem 0.625rem;
+    font-size: 0.75rem;
   }
 }
 
