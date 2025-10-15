@@ -6,9 +6,17 @@ export default function AnimaSimplified() {
   const [cameraStream, setCameraStream] = useState(null);
   const [analysisVisible, setAnalysisVisible] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [logoutConfirmation, setLogoutConfirmation] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (cameraStream) {
         cameraStream.getTracks().forEach(track => track.stop());
       }
@@ -30,11 +38,12 @@ export default function AnimaSimplified() {
     resetCameraInterface();
   };
 
-  const startCamera = async () => {
+  const takePhotoAndStart = async () => {
     try {
-      const startBtn = document.getElementById('start-camera');
-      if (startBtn) {
-        startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
+      const captureBtn = document.getElementById('capture-photo');
+      if (captureBtn) {
+        captureBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Iniciando...</span>';
+        captureBtn.disabled = true;
       }
       
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -44,6 +53,8 @@ export default function AnimaSimplified() {
       videoElement.srcObject = stream;
       videoElement.autoplay = true;
       videoElement.style.width = '100%';
+      videoElement.style.height = '100%';
+      videoElement.style.objectFit = 'cover';
       videoElement.style.borderRadius = '12px';
       
       const preview = document.getElementById('camera-preview');
@@ -52,22 +63,27 @@ export default function AnimaSimplified() {
         preview.appendChild(videoElement);
       }
       
-      const takeBtn = document.getElementById('take-photo');
-      if (takeBtn) takeBtn.disabled = false;
-      if (startBtn) startBtn.style.display = 'none';
+      if (captureBtn) {
+        captureBtn.innerHTML = '<i class="fas fa-camera"></i> <span>Capturar Foto</span>';
+        captureBtn.disabled = false;
+      }
       
       showNotification('Cámara activada correctamente');
     } catch (error) {
       showNotification('Error al acceder a la cámara', 'error');
-      const startBtn = document.getElementById('start-camera');
-      if (startBtn) {
-        startBtn.innerHTML = '<i class="fas fa-video"></i> Activar Cámara';
+      const captureBtn = document.getElementById('capture-photo');
+      if (captureBtn) {
+        captureBtn.innerHTML = '<i class="fas fa-camera"></i> <span>Tomarme una Foto</span>';
+        captureBtn.disabled = false;
       }
     }
   };
 
   const capturePhoto = () => {
-    if (!cameraStream) return;
+    if (!cameraStream) {
+      takePhotoAndStart();
+      return;
+    }
     
     const video = document.querySelector('#camera-preview video');
     if (video) {
@@ -78,10 +94,36 @@ export default function AnimaSimplified() {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0);
       
-      showAnalysisResults();
+      // Crear imagen desde el canvas
+      const imgDataUrl = canvas.toDataURL('image/jpeg');
       
+      // Mostrar la imagen capturada en el preview
+      const img = document.createElement('img');
+      img.src = imgDataUrl;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '12px';
+      
+      const preview = document.getElementById('camera-preview');
+      if (preview) {
+        preview.innerHTML = '';
+        preview.appendChild(img);
+      }
+      
+      // Detener el stream de la cámara
       cameraStream.getTracks().forEach(track => track.stop());
       setCameraStream(null);
+      
+      // Actualizar el botón de captura
+      const captureBtn = document.getElementById('capture-photo');
+      if (captureBtn) {
+        captureBtn.innerHTML = '<i class="fas fa-camera"></i> <span>Tomarme una Foto</span>';
+        captureBtn.disabled = false;
+      }
+      
+      // Iniciar análisis
+      showAnalysisResults();
     }
   };
 
@@ -97,6 +139,8 @@ export default function AnimaSimplified() {
           const img = document.createElement('img');
           img.src = e.target.result;
           img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
           img.style.borderRadius = '12px';
           
           const preview = document.getElementById('camera-preview');
@@ -105,6 +149,7 @@ export default function AnimaSimplified() {
             preview.appendChild(img);
           }
           
+          // Iniciar análisis
           showAnalysisResults();
         };
         reader.readAsDataURL(file);
@@ -162,20 +207,18 @@ export default function AnimaSimplified() {
 
   const resetCameraInterface = () => {
     const preview = document.getElementById('camera-preview');
-    const startBtn = document.getElementById('start-camera');
-    const takeBtn = document.getElementById('take-photo');
+    const captureBtn = document.getElementById('capture-photo');
     
     if (preview) {
       preview.innerHTML = `
         <i class="fas fa-camera camera-icon"></i>
-        <p>Activa tu cámara para comenzar</p>
+        <p>Haz clic en el botón para comenzar</p>
       `;
     }
-    if (startBtn) {
-      startBtn.style.display = 'inline-flex';
-      startBtn.innerHTML = '<i class="fas fa-video"></i> Activar Cámara';
+    if (captureBtn) {
+      captureBtn.innerHTML = '<i class="fas fa-camera"></i><span>Tomarme una Foto</span>';
+      captureBtn.disabled = false;
     }
-    if (takeBtn) takeBtn.disabled = true;
     setAnalysisVisible(false);
   };
 
@@ -202,9 +245,20 @@ export default function AnimaSimplified() {
   };
 
   const handleLogout = () => {
-    if (window.confirm('¿Estás seguro que deseas cerrar sesión?')) {
-      showNotification('Cerrando sesión...');
-    }
+    setLogoutConfirmation(true);
+  };
+
+  const confirmLogout = () => {
+    showNotification('Cerrando sesión...', 'info');
+    setTimeout(() => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }, 1000);
+  };
+
+  const cancelLogout = () => {
+    setLogoutConfirmation(false);
   };
 
   return (
@@ -256,7 +310,7 @@ export default function AnimaSimplified() {
             {/* Camera Button */}
             <button onClick={openEmotionAnalysis} className="camera-button">
               <i className="fas fa-camera"></i>
-              <span>Tomar foto</span>
+              <span>Tomarme una foto</span>
             </button>
           </div>
         </div>
@@ -270,7 +324,7 @@ export default function AnimaSimplified() {
             <div className="modal-header">
               <h3 className="modal-title">Análisis de Emoción</h3>
               <button onClick={closeEmotionModal} className="close-button">
-                <i className="fas fa-times"></i>
+                <i className="fas fa-times"></i>X
               </button>
             </div>
 
@@ -280,24 +334,26 @@ export default function AnimaSimplified() {
               <div className="camera-section">
                 <div id="camera-preview" className="camera-preview">
                   <i className="fas fa-camera camera-icon"></i>
-                  <p>Activa tu cámara para comenzar</p>
+                  <p>Haz clic en el botón para comenzar</p>
                 </div>
 
                 {/* Camera Controls */}
-                <div className="camera-controls">
-                  <button id="start-camera" onClick={startCamera} className="btn-camera btn-primary">
-                    <i className="fas fa-video"></i>
-                    Activar Cámara
-                  </button>
-                  
-                  <button id="take-photo" onClick={capturePhoto} disabled className="btn-camera btn-success">
+                <div className={`camera-controls-grid ${isMobile ? 'mobile' : ''}`}>
+                  <button 
+                    id="capture-photo" 
+                    onClick={capturePhoto}
+                    className="btn-capture"
+                  >
                     <i className="fas fa-camera"></i>
-                    Capturar Foto
+                    <span>Tomarme una Foto</span>
                   </button>
                   
-                  <button onClick={uploadPhoto} className="btn-camera btn-secondary">
+                  <button 
+                    onClick={uploadPhoto}
+                    className="btn-upload"
+                  >
                     <i className="fas fa-upload"></i>
-                    Subir Imagen
+                    <span>Subir Imagen</span>
                   </button>
                 </div>
               </div>
@@ -326,6 +382,26 @@ export default function AnimaSimplified() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {logoutConfirmation && (
+        <div className="modal-overlay logout-modal-overlay">
+          <div className="logout-confirmation-modal">
+            <h3 className="logout-modal-title">¿Cerrar sesión?</h3>
+            <p className="logout-modal-message">
+              ¿Estás seguro de que deseas cerrar tu sesión en Ánima?
+            </p>
+            <div className="logout-modal-actions">
+              <button onClick={cancelLogout} className="btn-cancel">
+                Cancelar
+              </button>
+              <button onClick={confirmLogout} className="btn-confirm-logout">
+                Sí, cerrar sesión
+              </button>
             </div>
           </div>
         </div>
