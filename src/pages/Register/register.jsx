@@ -80,7 +80,7 @@ export default function Register() {
       }, 2000);
     } catch (err) {
       console.error(err);
-      showPopup("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta nuevamente.");
+      showPopup("error", "Error", err.message || "No se pudo conectar con el servidor. Intenta nuevamente.");
     }
   };
 
