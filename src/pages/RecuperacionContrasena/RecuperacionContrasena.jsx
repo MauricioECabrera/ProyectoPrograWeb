@@ -1,10 +1,19 @@
 // src/pages/RecuperacionContrasena/RecuperacionContrasena.jsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { 
+  requestPasswordReset, 
+  verifyResetCode, 
+  resetPassword, 
+  resendResetCode 
+} from "../../utils/api";
 import Navbar from "../../components/Navbar";
 import "./RecuperacionContrasena.css";
 
 export default function RecuperacionContrasena() {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [popup, setPopup] = useState({
     show: false,
     type: "",
@@ -68,7 +77,7 @@ export default function RecuperacionContrasena() {
     setPopup({ ...popup, show: false });
   };
 
-  const handleStep1Submit = (e) => {
+  const handleStep1Submit = async (e) => {
     e.preventDefault();
     const validation = validateStep1();
 
@@ -77,14 +86,26 @@ export default function RecuperacionContrasena() {
       return;
     }
 
-    showPopup("success", "¡Código enviado!", `Se ha enviado un código de verificación a ${formData.email}`);
-    setTimeout(() => {
-      setCurrentStep(2);
-      closePopup();
-    }, 2000);
+    setIsLoading(true);
+
+    try {
+      await requestPasswordReset(formData.email);
+      
+      showPopup("success", "¡Código enviado!", `Se ha enviado un código de verificación a ${formData.email}. Revisa tu bandeja de entrada.`);
+      
+      setTimeout(() => {
+        setCurrentStep(2);
+        closePopup();
+      }, 2000);
+    } catch (error) {
+      console.error(error);
+      showPopup("error", "Error", error.message || "No se pudo enviar el código. Intenta nuevamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleStep2Submit = (e) => {
+  const handleStep2Submit = async (e) => {
     e.preventDefault();
     const validation = validateStep2();
 
@@ -93,19 +114,26 @@ export default function RecuperacionContrasena() {
       return;
     }
 
-    if (formData.verificationCode !== "123456") {
-      showPopup("error", "Código incorrecto", "El código ingresado no es válido. Intenta nuevamente.");
-      return;
-    }
+    setIsLoading(true);
 
-    showPopup("success", "¡Código verificado!", "Ahora puedes establecer tu nueva contraseña.");
-    setTimeout(() => {
-      setCurrentStep(3);
-      closePopup();
-    }, 1500);
+    try {
+      await verifyResetCode(formData.email, formData.verificationCode);
+      
+      showPopup("success", "¡Código verificado!", "Ahora puedes establecer tu nueva contraseña.");
+      
+      setTimeout(() => {
+        setCurrentStep(3);
+        closePopup();
+      }, 1500);
+    } catch (error) {
+      console.error(error);
+      showPopup("error", "Código incorrecto", error.message || "El código ingresado no es válido. Intenta nuevamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleStep3Submit = (e) => {
+  const handleStep3Submit = async (e) => {
     e.preventDefault();
     const validation = validateStep3();
 
@@ -114,14 +142,35 @@ export default function RecuperacionContrasena() {
       return;
     }
 
-    showPopup("success", "¡Contraseña actualizada!", "Tu contraseña ha sido cambiada exitosamente. Serás redirigido al login.");
-    setTimeout(() => {
-      showPopup("info", "Redirigiendo...", "En una aplicación real, serías redirigido al login para usar tu nueva contraseña.");
-    }, 2500);
+    setIsLoading(true);
+
+    try {
+      await resetPassword(formData.email, formData.verificationCode, formData.newPassword);
+      
+      showPopup("success", "¡Contraseña actualizada!", "Tu contraseña ha sido cambiada exitosamente. Serás redirigido al login.");
+      
+      setTimeout(() => {
+        navigate("/login");
+      }, 2500);
+    } catch (error) {
+      console.error(error);
+      showPopup("error", "Error", error.message || "No se pudo actualizar la contraseña. Intenta nuevamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResendCode = () => {
-    showPopup("info", "Código reenviado", `Se ha enviado un nuevo código de verificación a ${formData.email}`);
+  const handleResendCode = async () => {
+    try {
+      setIsLoading(true);
+      await resendResetCode(formData.email);
+      showPopup("info", "Código reenviado", `Se ha enviado un nuevo código de verificación a ${formData.email}`);
+    } catch (error) {
+      console.error(error);
+      showPopup("error", "Error", error.message || "No se pudo reenviar el código. Intenta nuevamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -164,12 +213,13 @@ export default function RecuperacionContrasena() {
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
+            disabled={isLoading}
           />
         </div>
       </div>
       
-      <button type="submit" className="btn">
-        Enviar código
+      <button type="submit" className="btn" disabled={isLoading}>
+        {isLoading ? 'Enviando...' : 'Enviar código'}
       </button>
     </form>
   );
@@ -191,19 +241,25 @@ export default function RecuperacionContrasena() {
             onChange={(e) => setFormData({ ...formData, verificationCode: e.target.value.replace(/\D/g, '') })}
             required
             className="code-input"
+            disabled={isLoading}
           />
         </div>
         
         <div className="resend-container">
           <span>¿No recibiste el código? </span>
-          <button type="button" className="resend-btn" onClick={handleResendCode}>
+          <button 
+            type="button" 
+            className="resend-btn" 
+            onClick={handleResendCode}
+            disabled={isLoading}
+          >
             Reenviar código
           </button>
         </div>
       </div>
       
-      <button type="submit" className="btn">
-        Verificar código
+      <button type="submit" className="btn" disabled={isLoading}>
+        {isLoading ? 'Verificando...' : 'Verificar código'}
       </button>
     </form>
   );
@@ -223,6 +279,7 @@ export default function RecuperacionContrasena() {
             value={formData.newPassword}
             onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
             required
+            disabled={isLoading}
           />
         </div>
         
@@ -235,12 +292,13 @@ export default function RecuperacionContrasena() {
             value={formData.confirmPassword}
             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
             required
+            disabled={isLoading}
           />
         </div>
       </div>
       
-      <button type="submit" className="btn">
-        Cambiar contraseña
+      <button type="submit" className="btn" disabled={isLoading}>
+        {isLoading ? 'Cambiando...' : 'Cambiar contraseña'}
       </button>
     </form>
   );
@@ -269,7 +327,6 @@ export default function RecuperacionContrasena() {
 
       {/* Main Container */}
       <div className="recovery-container">
-        
         {renderStepIndicator()}
 
         <div className="recovery-card">
@@ -280,7 +337,7 @@ export default function RecuperacionContrasena() {
 
         {currentStep > 1 && (
           <div className="recovery-actions">
-            <button className="back-btn" onClick={handleBack}>
+            <button className="back-btn" onClick={handleBack} disabled={isLoading}>
               ← Volver
             </button>
           </div>

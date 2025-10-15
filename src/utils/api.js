@@ -37,6 +37,7 @@ export async function apiFetch(path, options = {}) {
   return body;
 }
 
+// ===== AUTENTICACIÓN =====
 export async function login(email, password) {
   return apiFetch('/auth/login', {
     method: 'POST',
@@ -74,6 +75,39 @@ export function isAuthenticated() {
   return true;
 }
 
+// ===== RECUPERACIÓN DE CONTRASEÑA =====
+export async function requestPasswordReset(email) {
+  return apiFetch('/auth/password/request-reset', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function verifyResetCode(email, code) {
+  return apiFetch('/auth/password/verify-code', {
+    method: 'POST',
+    body: JSON.stringify({ email, code }),
+  });
+}
+
+export async function resetPassword(email, code, newPassword) {
+  return apiFetch('/auth/password/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ 
+      email, 
+      code, 
+      new_password: newPassword 
+    }),
+  });
+}
+
+export async function resendResetCode(email) {
+  return apiFetch('/auth/password/resend-code', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
 export default {
   API_URL,
   getAuthHeaders,
@@ -81,4 +115,8 @@ export default {
   login,
   register,
   isAuthenticated,
+  requestPasswordReset,
+  verifyResetCode,
+  resetPassword,
+  resendResetCode,
 };
