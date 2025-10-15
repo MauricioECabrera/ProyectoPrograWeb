@@ -3,6 +3,7 @@ from flask_cors import CORS
 from config import Config
 from database.connection import Database
 from controllers.auth_controller import auth_bp
+from controllers.password_reset_controller import password_reset_bp
 
 def create_app():
     """Factory para crear la aplicación Flask"""
@@ -17,6 +18,7 @@ def create_app():
     
     # Registrar blueprints
     app.register_blueprint(auth_bp)
+    app.register_blueprint(password_reset_bp)  # ← ESTE ES EL IMPORTANTE
     
     # Ruta de prueba
     @app.route('/health', methods=['GET'])
@@ -42,6 +44,12 @@ def create_app():
                     'login': '/auth/login',
                     'verify': '/auth/verify',
                     'me': '/auth/me'
+                },
+                'password_reset': {
+                    'request': '/auth/password/request-reset',
+                    'verify': '/auth/password/verify-code',
+                    'reset': '/auth/password/reset-password',
+                    'resend': '/auth/password/resend-code'
                 }
             }
         }), 200
@@ -78,8 +86,15 @@ def main():
         print("❌ Error al conectar con la base de datos\n")
         return
     
+    # Mostrar rutas registradas
+    print("📋 Rutas registradas:")
+    with app.app_context():
+        for rule in app.url_map.iter_rules():
+            if rule.endpoint != 'static':
+                print(f"   {rule.methods} {rule.rule}")
+    
     # Iniciar servidor
-    print(f"🚀 Servidor iniciando en http://{Config.HOST}:{Config.PORT}")
+    print(f"\n🚀 Servidor iniciando en http://{Config.HOST}:{Config.PORT}")
     print(f"🌍 Entorno: {'Desarrollo' if Config.DEBUG else 'Producción'}")
     print(f"🔐 CORS habilitado para: {', '.join(Config.CORS_ORIGINS)}\n")
     
