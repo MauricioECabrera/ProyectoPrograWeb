@@ -1,16 +1,15 @@
 // src/App.js
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-// Bienvenida: usamos index.jsx dentro de la carpeta
+// Páginas
 import Bienvenida from "./pages/Bienvenida/index";
-
-// Estos tres están como Nombre/Nombre.jsx
 import Login from "./pages/Login/login";
 import Register from "./pages/Register/register";
 import Principal from "./pages/Principal/principal";
-
-// Importamos la nueva página de recuperación de contraseña
 import RecuperacionContrasena from "./pages/RecuperacionContrasena/RecuperacionContrasena";
+
+// Componente de protección de rutas
+import ProtectedRoute from "./components/ProtectRout";
 
 export default function App() {
   return (
@@ -20,9 +19,19 @@ export default function App() {
         <Route path="/index" element={<Bienvenida />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/principal" element={<Principal />} />
         <Route path="/recuperar-contrasena" element={<RecuperacionContrasena />} />
-        <Route path="*" element={<h1>404</h1>} />
+        
+        {/* Ruta protegida - Solo accesible con autenticación */}
+        <Route 
+          path="/principal" 
+          element={
+            <ProtectedRoute>
+              <Principal />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route path="*" element={<h1>404 - Página no encontrada</h1>} />
       </Routes>
     </BrowserRouter>
   );
